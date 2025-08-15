@@ -63,9 +63,6 @@ dependencies {
     // Material 3
     implementation("androidx.compose.material3:material3")
     
-    // WebView
-    implementation("com.google.accompanist:accompanist-webview:0.32.0")
-    
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
