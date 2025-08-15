@@ -3,21 +3,32 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-  <!-- Palestine flag colors -->
-  <!-- Black stripe -->
-  <path
-      android:fillColor="#000000"
-      android:pathData="M0,27h108v18h-108z"/>
-  <!-- White stripe -->
-  <path
-      android:fillColor="#FFFFFF"
-      android:pathData="M0,45h108v18h-108z"/>
-  <!-- Green stripe -->
-  <path
-      android:fillColor="#007A3D"
-      android:pathData="M0,63h108v18h-108z"/>
-  <!-- Red triangle -->
-  <path
-      android:fillColor="#CE1126"
-      android:pathData="M0,27 L36,54 L0,81z"/>
+  
+  <!-- Scale and center the flag design -->
+  <group
+      android:translateX="22"
+      android:translateY="22"
+      android:scaleX="1.0"
+      android:scaleY="1.0">
+    
+    <!-- Black stripe (top) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M64,32 C64,32 64,19.5 64,19.5 C58.7,8.4 46.1,0 32,0 C23.7,0 16.2,3.4 10.8,8.8 L10.8,32 L64,32 Z"/>
+    
+    <!-- White stripe (middle) -->
+    <path
+        android:fillColor="#F0F0F0"
+        android:pathData="M10.8,19.5 L64,19.5 L64,44.5 L10.8,44.5 Z"/>
+    
+    <!-- Green stripe (bottom) -->
+    <path
+        android:fillColor="#6DA544"
+        android:pathData="M64,44.5 L10.8,44.5 L10.8,55.2 C16.2,60.6 23.7,64 32,64 C46.1,64 58.7,55.6 64,44.5 Z"/>
+    
+    <!-- Red triangle -->
+    <path
+        android:fillColor="#D80027"
+        android:pathData="M10.8,8.8 C5.4,14.2 0,21.7 0,32 C0,42.3 5.4,49.8 10.8,55.2 L32,32 Z"/>
+  </group>
 </vector>

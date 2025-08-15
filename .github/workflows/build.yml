@@ -29,36 +29,8 @@ jobs:
     - name: Build Debug APK
       run: ./gradlew assembleDebug
     
-    - name: Decode Keystore
-      if: ${{ env.KEYSTORE_BASE64 != '' }}
-      env:
-        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      run: |
-        if [ -n "$KEYSTORE_BASE64" ]; then
-          echo $KEYSTORE_BASE64 | base64 -d > app/keystore.jks
-          echo "Keystore decoded successfully"
-        else
-          echo "No keystore provided, skipping release build"
-        fi
-    
-    - name: Build Release APK
-      if: ${{ env.KEYSTORE_BASE64 != '' }}
-      env:
-        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: |
-        if [ -n "$KEYSTORE_BASE64" ] && [ -f "app/keystore.jks" ]; then
-          echo "Building signed release APK"
-          ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=$(pwd)/app/keystore.jks \
-            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
-            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
-            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
-        else
-          echo "Skipping release build - no keystore available"
-        fi
+    - name: Build Release APK (Unsigned)
+      run: ./gradlew assembleRelease
     
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
@@ -67,12 +39,10 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
     
     - name: Upload Release APK
-      if: ${{ env.KEYSTORE_BASE64 != '' }}
       uses: actions/upload-artifact@v4
       with:
-        name: release-apk
-        path: app/build/outputs/apk/release/*.apk
-      continue-on-error: true
+        name: release-apk-unsigned
+        path: app/build/outputs/apk/release/*unsigned*.apk
     
     - name: Create Release
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -83,23 +53,33 @@ jobs:
         body: |
           ## Free Palestine App 🇵🇸
           
-          ### What's New
-          - Automated build from commit ${{ github.sha }}
+          ### 📱 Available Versions:
           
-          ### Download
-          - Debug APK: For testing purposes (always available)
-          - Release APK: Signed production build (only if keystore is configured)
+          #### Debug APK
+          - For testing and development
+          - Includes debugging information
+          - Larger file size
           
-          ### Installation
-          1. Download the Debug APK file
-          2. Enable "Install from unknown sources" in your Android settings
+          #### Release APK (Unsigned)
+          - Optimized for production
+          - Smaller file size
+          - Better performance
+          - Requires enabling "Install from unknown sources"
+          
+          ### 📥 Installation Instructions:
+          1. Download the APK file (Debug or Release)
+          2. Enable "Install from unknown sources" in Android settings
           3. Open the downloaded APK to install
+          
+          ### 🆕 What's New
+          - Build from commit: ${{ github.sha }}
+          - Automated build #${{ github.run_number }}
           
           ---
           **Stand with Palestine** 🇵🇸
         files: |
           app/build/outputs/apk/debug/*.apk
-          app/build/outputs/apk/release/*.apk
+          app/build/outputs/apk/release/*unsigned*.apk
         draft: false
         prerelease: false
       env:
