@@ -26,25 +26,26 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Create Stable Keystore
+    - name: Decode Keystore
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
       run: |
-        echo "Creating stable keystore for consistent signing..."
-        # Create keystore with fixed seed for consistency
-        keytool -genkey -v -keystore ${{ github.workspace }}/app/palestine-stable.jks \
-          -keyalg RSA -keysize 2048 -validity 10000 \
-          -alias palestineapp \
-          -dname "CN=Palestine Here App, OU=Palestine, O=Free Palestine, L=Gaza, ST=Palestine, C=PS" \
-          -storepass freepalestine2024 \
-          -keypass freepalestine2024 \
-          -noprompt
+        echo "Decoding keystore from secrets..."
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ${{ github.workspace }}/app/keystore.jks
     
     - name: Build Release APK (Signed)
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
       run: |
         ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/palestine-stable.jks \
-          -Pandroid.injected.signing.store.password=freepalestine2024 \
-          -Pandroid.injected.signing.key.alias=palestineapp \
-          -Pandroid.injected.signing.key.password=freepalestine2024
+          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/keystore.jks \
+          -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+          -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+          -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+    
+    - name: Build Release APK (Unsigned)
+      if: ${{ secrets.KEYSTORE_BASE64 == '' }}
+      run: |
+        echo "Building unsigned APK (no keystore in secrets)..."
+        ./gradlew assembleRelease
     
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
@@ -61,13 +62,13 @@ jobs:
         body: |
           ## 🇵🇸 Free Palestine App - Version 1.1
           
-          ### 📱 Release APK (Signed)
+          ### 📱 Release APK
           
-          This is a production-ready, signed APK that can be installed directly on any Android device.
+          This is a production-ready APK that can be installed directly on any Android device.
           
           #### 🆕 What's New in v1.1:
           - ✅ New package name: `com.palestine.here`
-          - ✅ Stable signing certificate (no reinstall required for updates)
+          - ✅ Stable signing certificate
           - ✅ System bars color set to #F1F4F9
           - ✅ Improved app performance
           - ✅ Updated app icon with Palestine flag design
@@ -86,11 +87,11 @@ jobs:
           3. Open the downloaded APK to install
           4. Enjoy the app!
           
-          ### 🔒 Signature Info:
-          - Certificate: Palestine Here App
-          - Organization: Free Palestine
+          ### 📦 Package Info:
           - Package: `com.palestine.here`
           - Version: 1.1
+          - Min Android: 7.0 (API 24)
+          - Target Android: 14 (API 34)
           
           ---
           **Stand with Palestine** 🇵🇸 ✊
