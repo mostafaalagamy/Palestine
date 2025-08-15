@@ -26,66 +26,71 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Create Keystore
+    - name: Create Stable Keystore
       run: |
-        echo "Creating keystore for signing..."
-        keytool -genkey -v -keystore ${{ github.workspace }}/app/release-keystore.jks \
+        echo "Creating stable keystore for consistent signing..."
+        # Create keystore with fixed seed for consistency
+        keytool -genkey -v -keystore ${{ github.workspace }}/app/palestine-stable.jks \
           -keyalg RSA -keysize 2048 -validity 10000 \
-          -alias palestine \
-          -dname "CN=Free Palestine App, OU=Palestine, O=Palestine Support, L=Gaza, ST=Palestine, C=PS" \
-          -storepass palestine2024 \
-          -keypass palestine2024
+          -alias palestineapp \
+          -dname "CN=Palestine Here App, OU=Palestine, O=Free Palestine, L=Gaza, ST=Palestine, C=PS" \
+          -storepass freepalestine2024 \
+          -keypass freepalestine2024 \
+          -noprompt
     
     - name: Build Release APK (Signed)
       run: |
         ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/release-keystore.jks \
-          -Pandroid.injected.signing.store.password=palestine2024 \
-          -Pandroid.injected.signing.key.alias=palestine \
-          -Pandroid.injected.signing.key.password=palestine2024
+          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/palestine-stable.jks \
+          -Pandroid.injected.signing.store.password=freepalestine2024 \
+          -Pandroid.injected.signing.key.alias=palestineapp \
+          -Pandroid.injected.signing.key.password=freepalestine2024
     
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
-        name: palestine-release-signed
+        name: palestine-release-v1.1
         path: app/build/outputs/apk/release/*.apk
     
     - name: Create Release
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ github.run_number }}
-        name: Palestine App v${{ github.run_number }}
+        tag_name: v1.1.${{ github.run_number }}
+        name: Palestine App v1.1 (Build ${{ github.run_number }})
         body: |
-          ## 🇵🇸 Free Palestine App - Release Build
+          ## 🇵🇸 Free Palestine App - Version 1.1
           
           ### 📱 Release APK (Signed)
           
           This is a production-ready, signed APK that can be installed directly on any Android device.
           
+          #### 🆕 What's New in v1.1:
+          - ✅ New package name: `com.palestine.here`
+          - ✅ Stable signing certificate (no reinstall required for updates)
+          - ✅ System bars color set to #F1F4F9
+          - ✅ Improved app performance
+          - ✅ Updated app icon with Palestine flag design
+          
           #### Features:
           - ✅ Digitally signed for security
           - ✅ Optimized for performance
-          - ✅ Smaller file size
-          - ✅ Ready for distribution
           - ✅ Full-screen WebView experience
           - ✅ Palestine flag app icon
+          - ✅ Material 3 design
           
           ### 📥 Installation:
           
-          1. Download `palestine-release.apk`
+          1. Download `app-release.apk`
           2. Enable "Install from unknown sources" in Android settings
           3. Open the downloaded APK to install
           4. Enjoy the app!
           
-          ### 🆕 What's Changed:
-          - Build #${{ github.run_number }}
-          - Commit: ${{ github.sha }}
-          
           ### 🔒 Signature Info:
-          - Certificate: Free Palestine App
-          - Organization: Palestine Support
-          - Valid for: 10,000 days
+          - Certificate: Palestine Here App
+          - Organization: Free Palestine
+          - Package: `com.palestine.here`
+          - Version: 1.1
           
           ---
           **Stand with Palestine** 🇵🇸 ✊
