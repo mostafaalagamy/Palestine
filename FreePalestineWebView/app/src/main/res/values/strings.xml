@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Free Palestine</string>
+    <string name="loading">جاري التحميل...</string>
+    <string name="back">رجوع</string>
+    <string name="forward">إلى الأمام</string>
+    <string name="refresh">تحديث</string>
+    <string name="error_title">خطأ في التحميل</string>
+    <string name="error_message">تحقق من اتصالك بالإنترنت وحاول مرة أخرى</string>
+    <string name="retry">إعادة المحاولة</string>
+</resources>
