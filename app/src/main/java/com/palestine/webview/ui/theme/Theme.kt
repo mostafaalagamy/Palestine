@@ -18,6 +18,9 @@ private val PalestineRed = Color(0xFFCE1126)
 private val PalestineBlack = Color(0xFF000000)
 private val PalestineWhite = Color(0xFFFFFFFF)
 
+// System bars color
+private val SystemBarsColor = Color(0xFFF1F4F9)
+
 private val DarkColorScheme = darkColorScheme(
     primary = PalestineGreen,
     onPrimary = PalestineWhite,
@@ -97,14 +100,14 @@ fun PalestineTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Make status bar and navigation bar transparent
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
+            // Set status bar and navigation bar to #F1F4F9
+            window.statusBarColor = SystemBarsColor.toArgb()
+            window.navigationBarColor = SystemBarsColor.toArgb()
             
-            // Set light/dark icons based on theme
+            // Set dark icons for light background
             val windowInsetsController = WindowCompat.getInsetsController(window, view)
-            windowInsetsController.isAppearanceLightStatusBars = !darkTheme
-            windowInsetsController.isAppearanceLightNavigationBars = !darkTheme
+            windowInsetsController.isAppearanceLightStatusBars = true
+            windowInsetsController.isAppearanceLightNavigationBars = true
         }
     }
 
