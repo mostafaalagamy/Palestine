@@ -1,0 +1,38 @@
+#!/bin/bash
+
+echo "🚀 Preparing to push Palestine App to GitHub..."
+echo ""
+echo "📋 Current Status:"
+git status --short
+echo ""
+
+echo "📦 Files to be pushed:"
+git log --oneline -n 5
+echo ""
+
+echo "🔧 To push to your repository, run these commands:"
+echo "=========================================="
+echo ""
+echo "# 1. If you haven't set the remote yet:"
+echo "git remote set-url origin https://github.com/mostafaalagamy/Palestine.git"
+echo ""
+echo "# 2. Push to main branch:"
+echo "git push -u origin main"
+echo ""
+echo "# Or if you prefer to force push (overwrites remote):"
+echo "git push -u origin main --force"
+echo ""
+echo "=========================================="
+echo ""
+echo "📌 Alternative: Manual steps"
+echo "1. Copy all files from /workspace/Palestine to your local machine"
+echo "2. Initialize git in your local folder: git init"
+echo "3. Add remote: git remote add origin https://github.com/mostafaalagamy/Palestine.git"
+echo "4. Add all files: git add -A"
+echo "5. Commit: git commit -m 'Initial commit'"
+echo "6. Push: git push -u origin main"
+echo ""
+echo "🔑 Don't forget to add the GitHub Secrets!"
+echo "Check KEYSTORE_INFO.md for details"
+echo ""
+echo "Free Palestine 🇵🇸"
