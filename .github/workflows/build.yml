@@ -26,33 +26,38 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Decode Keystore
-      if: github.event_name != 'pull_request'
-      env:
-        ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
-      run: |
-        if [ -n "$ENCODED_KEYSTORE" ]; then
-          echo $ENCODED_KEYSTORE | base64 -d > app/keystore.jks
-        fi
-    
     - name: Build Debug APK
       run: ./gradlew assembleDebug
     
-    - name: Build Release APK
-      if: github.event_name != 'pull_request'
+    - name: Decode Keystore
+      if: ${{ env.KEYSTORE_BASE64 != '' }}
       env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      run: |
+        if [ -n "$KEYSTORE_BASE64" ]; then
+          echo $KEYSTORE_BASE64 | base64 -d > app/keystore.jks
+          echo "Keystore decoded successfully"
+        else
+          echo "No keystore provided, skipping release build"
+        fi
+    
+    - name: Build Release APK
+      if: ${{ env.KEYSTORE_BASE64 != '' }}
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
-        if [ -f "app/keystore.jks" ]; then
+        if [ -n "$KEYSTORE_BASE64" ] && [ -f "app/keystore.jks" ]; then
+          echo "Building signed release APK"
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=keystore.jks \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/keystore.jks \
             -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
             -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
             -Pandroid.injected.signing.key.password=$KEY_PASSWORD
         else
-          ./gradlew assembleRelease
+          echo "Skipping release build - no keystore available"
         fi
     
     - name: Upload Debug APK
@@ -62,11 +67,12 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
     
     - name: Upload Release APK
-      if: github.event_name != 'pull_request'
+      if: ${{ env.KEYSTORE_BASE64 != '' }}
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
         path: app/build/outputs/apk/release/*.apk
+      continue-on-error: true
     
     - name: Create Release
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -81,11 +87,11 @@ jobs:
           - Automated build from commit ${{ github.sha }}
           
           ### Download
-          - Debug APK: For testing purposes
-          - Release APK: Signed production build (if keystore is configured)
+          - Debug APK: For testing purposes (always available)
+          - Release APK: Signed production build (only if keystore is configured)
           
           ### Installation
-          1. Download the APK file
+          1. Download the Debug APK file
           2. Enable "Install from unknown sources" in your Android settings
           3. Open the downloaded APK to install
           
@@ -98,3 +104,4 @@ jobs:
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
