@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
@@ -35,6 +36,13 @@ class MainActivity : ComponentActivity() {
 fun FreePalestineWebView() {
     val url = "https://free-palestine.flutterflow.app/?s=09"
     var isLoading by remember { mutableStateOf(true) }
+    var webView by remember { mutableStateOf<WebView?>(null) }
+    var canGoBack by remember { mutableStateOf(false) }
+    
+    // Handle back press
+    BackHandler(enabled = canGoBack) {
+        webView?.goBack()
+    }
     
     Box(
         modifier = Modifier.fillMaxSize()
@@ -43,6 +51,8 @@ fun FreePalestineWebView() {
         AndroidView(
             factory = { context ->
                 WebView(context).apply {
+                    webView = this
+                    
                     webViewClient = object : WebViewClient() {
                         override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
                             super.onPageStarted(view, url, favicon)
@@ -52,6 +62,12 @@ fun FreePalestineWebView() {
                         override fun onPageFinished(view: WebView?, url: String?) {
                             super.onPageFinished(view, url)
                             isLoading = false
+                            canGoBack = view?.canGoBack() ?: false
+                        }
+                        
+                        override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                            super.doUpdateVisitedHistory(view, url, isReload)
+                            canGoBack = view?.canGoBack() ?: false
                         }
                     }
                     
@@ -66,12 +82,22 @@ fun FreePalestineWebView() {
                         databaseEnabled = true
                         allowFileAccess = true
                         allowContentAccess = true
+                        
+                        // Enable caching for better performance
+                        cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                        
+                        // Support for mixed content (http and https)
+                        mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                     }
                     
                     loadUrl(url)
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            update = { view ->
+                // Keep reference updated
+                webView = view
+            }
         )
         
         // Loading overlay
