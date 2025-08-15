@@ -12,6 +12,7 @@ local.properties
 # Keystore files
 *.jks
 *.keystore
+keystore_base64.txt
 
 # APK files
 *.apk
@@ -19,6 +20,3 @@ local.properties
 
 # Log files
 *.log
-
-# Gradle wrapper jar
-gradle/wrapper/gradle-wrapper.jar

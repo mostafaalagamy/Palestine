@@ -1,33 +1,45 @@
 # 🔐 Keystore Information for GitHub Secrets
 
+## Generate Your Own Keystore
+
+First, generate a keystore file locally:
+
+```bash
+keytool -genkey -v -keystore release-key.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias my-key-alias
+```
+
+Then convert it to base64:
+
+```bash
+base64 -w 0 release-key.jks > keystore_base64.txt
+```
+
 ## GitHub Repository Secrets Configuration
 
 Add these secrets to your repository at:
 **Settings → Secrets and variables → Actions → New repository secret**
 
-### 1. KEYSTORE_BASE64
-Copy the entire content from `keystore_base64.txt` file
+### Required Secrets:
 
-### 2. KEYSTORE_PASSWORD
-```
-palestine2024
-```
+1. **KEYSTORE_BASE64**
+   - The base64 encoded content of your keystore file
+   - Get it by running: `base64 -w 0 your-keystore.jks`
 
-### 3. KEY_ALIAS
-```
-palestine-key
-```
+2. **KEYSTORE_PASSWORD**
+   - The password you used when creating the keystore
 
-### 4. KEY_PASSWORD
-```
-palestine2024
-```
+3. **KEY_ALIAS**
+   - The alias you used when creating the keystore
+
+4. **KEY_PASSWORD**
+   - The key password (usually same as keystore password)
 
 ## Important Notes
 
 - ⚠️ **NEVER** commit the `.jks` file to the repository
-- The keystore file (`palestine-release-key.jks`) has been generated locally
-- The base64 encoded version is in `keystore_base64.txt`
+- Keep your keystore file and passwords secure
 - These credentials are required for building signed Release APKs
 - Debug APKs will build without these secrets
 
