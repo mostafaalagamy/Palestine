@@ -1,4 +1,4 @@
-package com.palestine.webview
+package com.palestine.here
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -16,17 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
-import com.palestine.webview.ui.theme.PalestineTheme
+import com.palestine.here.ui.theme.PalestineTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Enable edge-to-edge display
-        enableEdgeToEdge()
-        
-        // Make system bars transparent
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         
         setContent {
             PalestineTheme {
@@ -43,9 +37,7 @@ fun FreePalestineWebView() {
     var isLoading by remember { mutableStateOf(true) }
     
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding() // Add padding for system bars
+        modifier = Modifier.fillMaxSize()
     ) {
         // WebView using AndroidView
         AndroidView(
@@ -113,7 +105,7 @@ fun FreePalestineWebView() {
                     .fillMaxWidth()
                     .align(Alignment.TopCenter),
                 color = Color(0xFF007A3D), // Palestine green
-                trackColor = Color.Transparent
+                trackColor = Color(0xFFF1F4F9) // Same as system bars
             )
         }
     }
