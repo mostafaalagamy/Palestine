@@ -1,0 +1,100 @@
+name: Build Palestine App
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Create Keystore
+      run: |
+        echo "Creating keystore for signing..."
+        keytool -genkey -v -keystore ${{ github.workspace }}/app/release-keystore.jks \
+          -keyalg RSA -keysize 2048 -validity 10000 \
+          -alias palestine \
+          -dname "CN=Free Palestine App, OU=Palestine, O=Palestine Support, L=Gaza, ST=Palestine, C=PS" \
+          -storepass palestine2024 \
+          -keypass palestine2024
+    
+    - name: Build Release APK (Signed)
+      run: |
+        ./gradlew assembleRelease \
+          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/release-keystore.jks \
+          -Pandroid.injected.signing.store.password=palestine2024 \
+          -Pandroid.injected.signing.key.alias=palestine \
+          -Pandroid.injected.signing.key.password=palestine2024
+    
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: palestine-release-signed
+        path: app/build/outputs/apk/release/*.apk
+    
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Palestine App v${{ github.run_number }}
+        body: |
+          ## 🇵🇸 Free Palestine App - Release Build
+          
+          ### 📱 Release APK (Signed)
+          
+          This is a production-ready, signed APK that can be installed directly on any Android device.
+          
+          #### Features:
+          - ✅ Digitally signed for security
+          - ✅ Optimized for performance
+          - ✅ Smaller file size
+          - ✅ Ready for distribution
+          - ✅ Full-screen WebView experience
+          - ✅ Palestine flag app icon
+          
+          ### 📥 Installation:
+          
+          1. Download `palestine-release.apk`
+          2. Enable "Install from unknown sources" in Android settings
+          3. Open the downloaded APK to install
+          4. Enjoy the app!
+          
+          ### 🆕 What's Changed:
+          - Build #${{ github.run_number }}
+          - Commit: ${{ github.sha }}
+          
+          ### 🔒 Signature Info:
+          - Certificate: Free Palestine App
+          - Organization: Palestine Support
+          - Valid for: 10,000 days
+          
+          ---
+          **Stand with Palestine** 🇵🇸 ✊
+          
+          *This app displays the Free Palestine website in a native Android wrapper*
+        files: |
+          app/build/outputs/apk/release/*.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      continue-on-error: true
