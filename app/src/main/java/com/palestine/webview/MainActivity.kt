@@ -41,7 +41,6 @@ class MainActivity : ComponentActivity() {
 fun FreePalestineWebView() {
     val url = "https://free-palestine.flutterflow.app/?s=09"
     var isLoading by remember { mutableStateOf(true) }
-    var progress by remember { mutableStateOf(0) }
     
     Box(
         modifier = Modifier
@@ -72,9 +71,7 @@ fun FreePalestineWebView() {
                         builtInZoomControls = true
                         displayZoomControls = false
                         setSupportZoom(true)
-                        // Enable DOM storage for better web compatibility
                         databaseEnabled = true
-                        // Allow file access
                         allowFileAccess = true
                         allowContentAccess = true
                     }

@@ -29,7 +29,7 @@ jobs:
     - name: Create Keystore
       run: |
         echo "Creating keystore for signing..."
-        keytool -genkey -v -keystore app/release-keystore.jks \
+        keytool -genkey -v -keystore ${{ github.workspace }}/app/release-keystore.jks \
           -keyalg RSA -keysize 2048 -validity 10000 \
           -alias palestine \
           -dname "CN=Free Palestine App, OU=Palestine, O=Palestine Support, L=Gaza, ST=Palestine, C=PS" \
@@ -39,7 +39,7 @@ jobs:
     - name: Build Release APK (Signed)
       run: |
         ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=release-keystore.jks \
+          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/release-keystore.jks \
           -Pandroid.injected.signing.store.password=palestine2024 \
           -Pandroid.injected.signing.key.alias=palestine \
           -Pandroid.injected.signing.key.password=palestine2024
