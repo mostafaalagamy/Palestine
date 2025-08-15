@@ -26,14 +26,23 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
+    - name: Check for signing secrets
+      id: check_secrets
+      run: |
+        if [ ! -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+          echo "has_secrets=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_secrets=false" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Decode Keystore
-      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      if: steps.check_secrets.outputs.has_secrets == 'true'
       run: |
         echo "Decoding keystore from secrets..."
         echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ${{ github.workspace }}/app/keystore.jks
     
     - name: Build Release APK (Signed)
-      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      if: steps.check_secrets.outputs.has_secrets == 'true'
       run: |
         ./gradlew assembleRelease \
           -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/keystore.jks \
@@ -42,7 +51,7 @@ jobs:
           -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
     
     - name: Build Release APK (Unsigned)
-      if: ${{ secrets.KEYSTORE_BASE64 == '' }}
+      if: steps.check_secrets.outputs.has_secrets != 'true'
       run: |
         echo "Building unsigned APK (no keystore in secrets)..."
         ./gradlew assembleRelease
